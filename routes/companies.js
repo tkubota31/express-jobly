@@ -56,6 +56,7 @@ router.get("/", async function (req, res, next) {
   querySearch.minEmployees = +querySearch.minEmployees;
   querySearch.maxEmployees = +querySearch.maxEmployees;
   try {
+  //Check if desired schema matches the incoming json data
     const result = jsonschema.validate(querySearch,companySearch);
     if(!result.valid){
       let listOfErrors =  result.errors.map(error => error.stack);
