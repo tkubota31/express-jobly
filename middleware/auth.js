@@ -43,7 +43,21 @@ function ensureLoggedIn(req, res, next) {
 }
 
 
+// PART Three: Change authorization. Only admins who are logged in
+
+function ensureAdmin(req,res,next){
+  try{
+    if(!req.user || !req.user.isAdmin){
+      throw new UnauthorizedError();
+    } else{
+      return next();
+    }} catch (err){
+      return next(err);
+    }
+}
+
 module.exports = {
   authenticateJWT,
   ensureLoggedIn,
+  ensureAdmin,
 };
