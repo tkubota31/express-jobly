@@ -5,13 +5,13 @@
 const jsonschema = require("jsonschema");
 const express = require("express");
 
-const { BadRequestError } = require("../expressError");
+const { BadRequestError, ExpressError } = require("../expressError");
 const { ensureLoggedIn } = require("../middleware/auth");
 const Company = require("../models/company");
 
 const companyNewSchema = require("../schemas/companyNew.json");
 const companyUpdateSchema = require("../schemas/companyUpdate.json");
-
+const companySearch = require("../schemas/companySearch.json")
 const router = new express.Router();
 
 
@@ -51,8 +51,18 @@ router.post("/", ensureLoggedIn, async function (req, res, next) {
  */
 
 router.get("/", async function (req, res, next) {
+  const querySearch = req.query
+  //convert minEmployees and maxEmployees from string to int
+  querySearch.minEmployees = +querySearch.minEmployees;
+  querySearch.maxEmployees = +querySearch.maxEmployees;
   try {
-    const companies = await Company.findAll();
+    const result = jsonschema.validate(querySearch,companySearch);
+    if(!result.valid){
+      let listOfErrors =  result.errors.map(error => error.stack);
+      let error = new ExpressError(listOfErrors, 400);
+      return next(error)
+    }
+    const companies = await Company.findAll(querySeach);
     return res.json({ companies });
   } catch (err) {
     return next(err);
